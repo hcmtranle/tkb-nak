@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Thời Khóa Biểu — Trường TH Nguyễn An Khương</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f4f8;--card:#fff;--border:#e2e8f0;--text:#1a202c;--text2:#64748b;--text3:#94a3b8;
+  --primary:#1a73e8;--primary-dark:#1557b0;--success:#22c55e;--danger:#ef4444;--warning:#f59e0b;
+  --sidebar:#1e293b;--sidebar-text:#cbd5e1;--sidebar-active:#1a73e8;
+  --radius:10px;--shadow:0 1px 4px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04);
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{width:240px;min-height:100vh;background:var(--sidebar);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:width .2s}
+.sidebar-logo{padding:20px 16px 12px;border-bottom:1px solid #334155}
+.sidebar-logo h1{font-size:15px;font-weight:700;color:#f1f5f9;line-height:1.3}
+.sidebar-logo p{font-size:11px;color:#64748b;margin-top:2px}
+.sidebar-section{padding:16px 8px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#475569}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;margin:1px 8px;cursor:pointer;color:var(--sidebar-text);font-size:13px;font-weight:500;transition:all .15s;text-decoration:none}
+.nav-item:hover{background:#334155;color:#f1f5f9}
+.nav-item.active{background:var(--sidebar-active);color:#fff}
+.nav-item .icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.nav-divider{height:1px;background:#334155;margin:8px 16px}
+.sidebar-footer{margin-top:auto;padding:12px 16px;border-top:1px solid #334155;font-size:11px;color:#475569}
+
+/* ── MAIN ── */
+.main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.topbar-title{font-size:16px;font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.badge-admin{background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;display:none}
+.badge-user{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700}
+.content{padding:24px;flex:1}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+.card-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card-header h2{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.card-body{padding:16px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s}
+.btn:hover{background:var(--bg);color:var(--text)}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary-dark);color:#fff}
+.btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btn-sm{padding:4px 10px;font-size:12px}
+
+/* ── TKB TABLE ── */
+.tkb-wrap{overflow-x:auto}
+.tkb-table{width:100%;border-collapse:collapse;min-width:700px}
+.tkb-table th{background:#1a73e8;color:#fff;padding:10px 12px;font-size:12px;font-weight:600;text-align:center;position:sticky;top:0}
+.tkb-table th:first-child{background:#1557b0;min-width:60px}
+.tkb-table td{padding:8px 10px;border:1px solid var(--border);font-size:12px;text-align:center;vertical-align:middle;min-width:130px}
+.tkb-table tr:hover td{background:#f8faff}
+.tiet-label{background:#e8f0fe;font-weight:700;color:#1a73e8;white-space:nowrap}
+.tiet-sang{background:#f0f9ff}
+.tiet-chieu{background:#fffbeb}
+.cell-empty{color:var(--text3);font-style:italic;font-size:11px}
+.cell-content{display:flex;flex-direction:column;gap:2px}
+.cell-mon{font-weight:600;color:var(--text)}
+.cell-gv{font-size:11px;color:var(--text2)}
+.cell-chao-co{background:#fef3c7}
+.cell-ta{background:#f0fdf4}
+.cell-lk{background:#fdf4ff}
+.cell-tu-hoc{background:#f8fafc;color:var(--text3);font-style:italic;font-size:11px}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center}
+.filter-bar select,.filter-bar input{padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);font-size:13px;color:var(--text);min-width:160px}
+.filter-bar select:focus,.filter-bar input:focus{outline:none;border-color:var(--primary)}
+
+/* ── CONFLICTS ── */
+.conflict-item{display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2;margin-bottom:8px}
+.conflict-icon{font-size:20px;flex-shrink:0}
+.conflict-detail .label{font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase}
+.conflict-detail .desc{font-size:13px;font-weight:500;color:var(--text);margin-top:2px}
+.conflict-detail .sub{font-size:11px;color:var(--text2);margin-top:2px}
+.no-conflict{display:flex;align-items:center;gap:10px;padding:16px;border-radius:8px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-weight:500}
+
+/* ── STAT CARDS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.stat-card .num{font-size:28px;font-weight:800;color:var(--primary)}
+.stat-card .lbl{font-size:12px;color:var(--text2);margin-top:4px}
+
+/* ── ADMIN PANEL ── */
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.admin-grid{grid-template-columns:1fr}}
+.admin-action{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:20px;border-radius:10px;border:1px solid var(--border);background:var(--bg);cursor:pointer;transition:all .15s;text-align:center;text-decoration:none}
+.admin-action:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.admin-action:hover .admin-action-label{color:#fff}
+.admin-action:hover .admin-action-icon{filter:brightness(10)}
+.admin-action-icon{font-size:28px}
+.admin-action-label{font-size:13px;font-weight:600;color:var(--text)}
+.admin-action-sub{font-size:11px;color:var(--text2)}
+
+/* ── LOGIN MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;display:none}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border-radius:14px;padding:28px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h2{font-size:17px;font-weight:700;margin-bottom:6px}
+.modal p{font-size:13px;color:var(--text2);margin-bottom:20px}
+.modal input{width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);font-size:14px;margin-bottom:12px}
+.modal input:focus{outline:none;border-color:var(--primary)}
+.modal-btns{display:flex;gap:8px}
+.modal-error{font-size:12px;color:var(--danger);margin-bottom:8px;display:none}
+
+/* ── LOADING ── */
+.skeleton{background:linear-gradient(90deg,var(--border) 25%,var(--bg) 50%,var(--border) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px;height:14px;margin-bottom:8px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.loading-wrap{padding:32px;text-align:center;color:var(--text3)}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast-item{padding:12px 16px;border-radius:10px;background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);font-size:13px;display:flex;align-items:center;gap:8px;animation:slideUp .3s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.toast-success{border-left:3px solid var(--success)}
+.toast-error{border-left:3px solid var(--danger)}
+.toast-info{border-left:3px solid var(--primary)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar{width:0;overflow:hidden}
+  .main{margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══════════════════════════════════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <h1>🏫 TKB Nguyễn An Khương</h1>
+    <p>Năm học 2026–2027</p>
+  </div>
+
+  <div class="sidebar-section">Xem thời khóa biểu</div>
+  <a class="nav-item active" onclick="showView('overview')" href="#">
+    <span class="icon">📊</span> Tổng thể
+  </a>
+  <a class="nav-item" onclick="showView('by-grade')" href="#">
+    <span class="icon">🎓</span> Theo khối
+  </a>
+  <a class="nav-item" onclick="showView('by-class')" href="#">
+    <span class="icon">🏫</span> Theo lớp
+  </a>
+  <a class="nav-item" onclick="showView('by-teacher')" href="#">
+    <span class="icon">👩‍🏫</span> Theo giáo viên
+  </a>
+  <a class="nav-item" onclick="showView('by-subject')" href="#">
+    <span class="icon">📚</span> Theo môn học
+  </a>
+
+  <div class="nav-divider"></div>
+  <div class="sidebar-section">Quản lý</div>
+  <a class="nav-item" onclick="showView('conflicts')" href="#">
+    <span class="icon">⚠️</span> Xung đột tiết
+  </a>
+  <a class="nav-item" id="nav-admin" onclick="showView('admin')" href="#">
+    <span class="icon">⚙️</span> Admin
+  </a>
+
+  <div class="sidebar-footer">
+    <div id="login-status">👤 Đang xem: Khách</div>
+    <div style="margin-top:6px">
+      <a href="#" onclick="handleLoginToggle()" id="login-btn" style="color:#60a5fa;font-size:12px">Đăng nhập Admin</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ MAIN ══════════════════════════════════════════════════ -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">📊 Tổng thể toàn trường</div>
+    <div class="topbar-right">
+      <span class="badge-admin" id="badge-admin">🔑 ADMIN</span>
+      <span class="badge-user" id="badge-user">👁 CHỈ XEM</span>
+      <button class="btn btn-sm" onclick="refreshData()">🔄 Làm mới</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- VIEW: TỔNG THỂ -->
+    <div id="view-overview">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="num">29</div><div class="lbl">Lớp học</div></div>
+        <div class="stat-card"><div class="num">57</div><div class="lbl">Giáo viên</div></div>
+        <div class="stat-card"><div class="num">5</div><div class="lbl">Khối</div></div>
+        <div class="stat-card"><div class="num" id="stat-conflicts">—</div><div class="lbl">Xung đột</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>📋 Thông tin hệ thống</h2></div>
+        <div class="card-body">
+          <table style="width:100%;border-collapse:collapse">
+            <tr><td style="padding:8px;color:var(--text2);width:200px">Trường</td><td style="padding:8px;font-weight:600">Tiểu học Nguyễn An Khương</td></tr>
+            <tr style="background:var(--bg)"><td style="padding:8px;color:var(--text2)">Đơn vị chủ quản</td><td style="padding:8px;font-weight:600">UBND Phường Đông Hưng Thuận</td></tr>
+            <tr><td style="padding:8px;color:var(--text2)">Năm học</td><td style="padding:8px;font-weight:600">2026–2027</td></tr>
+            <tr style="background:var(--bg)"><td style="padding:8px;color:var(--text2)">Cơ sở dữ liệu</td><td style="padding:8px"><a href="https://docs.google.com/spreadsheets/d/1XsuzsI_EpVh_raaa2cyQ7uq66GYETvb3gclBKEZTzRc" target="_blank" style="color:var(--primary)">Google Sheets →</a></td></tr>
+            <tr><td style="padding:8px;color:var(--text2)">Cập nhật lần cuối</td><td style="padding:8px" id="last-updated">Đang tải...</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>🗂 Phân công giảng dạy — Tổng hợp</h2></div>
+        <div class="card-body">
+          <div id="overview-table-wrap"><div class="loading-wrap">⏳ Đang tải dữ liệu...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: THEO KHỐI -->
+    <div id="view-by-grade" style="display:none">
+      <div class="filter-bar">
+        <select id="sel-grade" onchange="loadGrade()">
+          <option value="">-- Chọn khối --</option>
+          <option value="1">Khối 1 (6 lớp)</option>
+          <option value="2">Khối 2 (6 lớp)</option>
+          <option value="3">Khối 3 (6 lớp)</option>
+          <option value="4">Khối 4 (6 lớp)</option>
+          <option value="5">Khối 5 (5 lớp)</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="loadGrade()">Xem</button>
+      </div>
+      <div id="grade-result"></div>
+    </div>
+
+    <!-- VIEW: THEO LỚP -->
+    <div id="view-by-class" style="display:none">
+      <div class="filter-bar">
+        <select id="sel-class" onchange="loadClass()">
+          <option value="">-- Chọn lớp --</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="loadClass()">Xem</button>
+      </div>
+      <div id="class-result"></div>
+    </div>
+
+    <!-- VIEW: THEO GIÁO VIÊN -->
+    <div id="view-by-teacher" style="display:none">
+      <div class="filter-bar">
+        <select id="sel-teacher" onchange="loadTeacher()">
+          <option value="">-- Chọn giáo viên --</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="loadTeacher()">Xem</button>
+      </div>
+      <div id="teacher-result"></div>
+    </div>
+
+    <!-- VIEW: THEO MÔN -->
+    <div id="view-by-subject" style="display:none">
+      <div class="filter-bar">
+        <select id="sel-subject" onchange="loadSubject()">
+          <option value="">-- Chọn môn --</option>
+          <option>Toán</option><option>Tiếng Việt</option><option>Đạo đức</option>
+          <option>TN&XH</option><option>Khoa học</option><option>LS&ĐL</option>
+          <option>GDTC</option><option>Âm nhạc</option><option>Mỹ thuật</option>
+          <option>Công nghệ</option><option>Tin học</option>
+          <option>Tiếng Anh</option><option>TA(BN)</option><option>TA(T-K)</option>
+          <option>IC3</option><option>CDS</option><option>KNS</option>
+          <option>Toán TD</option><option>STEM</option>
+          <option>Chào cờ</option><option>HĐTN Chủ đề</option><option>SHL</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="loadSubject()">Xem</button>
+      </div>
+      <div id="subject-result"></div>
+    </div>
+
+    <!-- VIEW: XUNG ĐỘT -->
+    <div id="view-conflicts" style="display:none">
+      <div class="card">
+        <div class="card-header">
+          <h2>⚠️ Kiểm tra xung đột tiết dạy</h2>
+          <button class="btn btn-sm" onclick="loadConflicts()">🔄 Kiểm tra lại</button>
+        </div>
+        <div class="card-body" id="conflicts-result">
+          <div class="loading-wrap">⏳ Đang kiểm tra...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: ADMIN -->
+    <div id="view-admin" style="display:none">
+      <div id="admin-locked" class="card">
+        <div class="card-body" style="text-align:center;padding:40px">
+          <div style="font-size:48px;margin-bottom:12px">🔒</div>
+          <div style="font-size:16px;font-weight:700;margin-bottom:8px">Khu vực dành riêng cho Admin</div>
+          <div style="color:var(--text2);margin-bottom:20px">Vui lòng đăng nhập để tiếp tục</div>
+          <button class="btn btn-primary" onclick="openLoginModal()">Đăng nhập Admin</button>
+        </div>
+      </div>
+      <div id="admin-panel" style="display:none">
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header"><h2>🔑 Admin — Quản lý thời khóa biểu</h2>
+            <button class="btn btn-sm btn-danger" onclick="logout()">Đăng xuất</button>
+          </div>
+          <div class="card-body">
+            <div class="admin-grid">
+              <a class="admin-action" href="https://docs.google.com/spreadsheets/d/1XsuzsI_EpVh_raaa2cyQ7uq66GYETvb3gclBKEZTzRc" target="_blank">
+                <span class="admin-action-icon">📊</span>
+                <span class="admin-action-label">Mở Google Sheet</span>
+                <span class="admin-action-sub">Chỉnh sửa TKB trực tiếp</span>
+              </a>
+              <a class="admin-action" href="https://script.google.com/home" target="_blank">
+                <span class="admin-action-icon">⚙️</span>
+                <span class="admin-action-label">Apps Script</span>
+                <span class="admin-action-sub">Quản lý API & deploy</span>
+              </a>
+              <div class="admin-action" onclick="refreshData()">
+                <span class="admin-action-icon">🔄</span>
+                <span class="admin-action-label">Đồng bộ dữ liệu</span>
+                <span class="admin-action-sub">Tải lại từ Google Sheet</span>
+              </div>
+              <div class="admin-action" onclick="loadConflicts();showView('conflicts')">
+                <span class="admin-action-icon">⚠️</span>
+                <span class="admin-action-label">Kiểm tra xung đột</span>
+                <span class="admin-action-sub">Phát hiện GV trùng tiết</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2>📋 Thông tin kết nối</h2></div>
+          <div class="card-body">
+            <table style="width:100%;border-collapse:collapse">
+              <tr><td style="padding:8px;color:var(--text2);width:200px">Google Sheet ID</td>
+                <td style="padding:8px;font-family:monospace;font-size:12px">1XsuzsI_EpVh_raaa2cyQ7uq66GYETvb3gclBKEZTzRc</td></tr>
+              <tr style="background:var(--bg)"><td style="padding:8px;color:var(--text2)">Apps Script URL</td>
+                <td style="padding:8px;font-family:monospace;font-size:11px;word-break:break-all" id="admin-api-url">—</td></tr>
+              <tr><td style="padding:8px;color:var(--text2)">Trạng thái API</td>
+                <td style="padding:8px" id="admin-api-status">Đang kiểm tra...</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL LOGIN ══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-login">
+  <div class="modal">
+    <h2>🔑 Đăng nhập Admin</h2>
+    <p>Nhập mật khẩu quản trị để chỉnh sửa thời khóa biểu</p>
+    <div class="modal-error" id="login-error">Mật khẩu không đúng. Vui lòng thử lại.</div>
+    <input type="password" id="pw-input" placeholder="Nhập mật khẩu..." onkeydown="if(event.key==='Enter')doLogin()"/>
+    <div class="modal-btns">
+      <button class="btn btn-primary" onclick="doLogin()" style="flex:1">Đăng nhập</button>
+      <button class="btn" onclick="closeLoginModal()">Huỷ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ════════════════════════════════════════════════ -->
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+const API_URL = 'https://script.google.com/macros/s/AKfycbyuo6TjGdDw_h0yx78euk3AIfkeyOfS3QRmCRGVEyHHFMPQviHBuloM3qrR5RnKz64g/exec';
+const DAYS = ['Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6'];
+const DAYS_SHORT = ['T2','T3','T4','T5','T6'];
+
+let isAdmin = false;
+let allTKB = null;
+let allTeachers = null;
+let currentView = 'overview';
+
+// ── INIT ────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  populateClassSelect();
+  loadOverview();
+  checkAdminSession();
+  document.getElementById('admin-api-url').textContent = API_URL;
+  // Test API
+  callAPI('classes').then(d => {
+    if (d && d.data) {
+      document.getElementById('admin-api-status').innerHTML = '<span style="color:var(--success)">✅ Kết nối tốt</span>';
+    } else {
+      document.getElementById('admin-api-status').innerHTML = '<span style="color:var(--danger)">⚠️ Lỗi kết nối</span>';
+    }
+  });
+});
+
+// ── API CALL ────────────────────────────────────────────────
+async function callAPI(action, params = {}) {
+  try {
+    const qs = new URLSearchParams({ action, ...params }).toString();
+    const res = await fetch(API_URL + '?' + qs);
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+// ── NAVIGATION ──────────────────────────────────────────────
+const VIEWS = ['overview','by-grade','by-class','by-teacher','by-subject','conflicts','admin'];
+const TITLES = {
+  'overview':'📊 Tổng thể toàn trường',
+  'by-grade':'🎓 Xem theo khối',
+  'by-class':'🏫 Xem theo lớp',
+  'by-teacher':'👩‍🏫 Xem theo giáo viên',
+  'by-subject':'📚 Xem theo môn học',
+  'conflicts':'⚠️ Kiểm tra xung đột',
+  'admin':'⚙️ Quản trị Admin',
+};
+
+function showView(v) {
+  if (v === 'admin' && !isAdmin) { openLoginModal(); return; }
+  VIEWS.forEach(id => {
+    document.getElementById('view-'+id).style.display = (id===v) ? '' : 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => {
+    if (el.getAttribute('onclick') && el.getAttribute('onclick').includes(v)) el.classList.add('active');
+  });
+  document.getElementById('page-title').textContent = TITLES[v] || '';
+  currentView = v;
+  if (v === 'conflicts') loadConflicts();
+  if (v === 'by-teacher' && !allTeachers) loadTeacherList();
+}
+
+// ── POPULATE SELECTS ────────────────────────────────────────
+function populateClassSelect() {
+  const sel = document.getElementById('sel-class');
+  const classes = [
+    '1.1','1.2','1.3','1.4','1.5','1.6',
+    '2.1','2.2','2.3','2.4','2.5','2.6',
+    '3.1','3.2','3.3','3.4','3.5','3.6',
+    '4.1','4.2','4.3','4.4','4.5','4.6',
+    '5.1','5.2','5.3','5.4','5.5',
+  ];
+  classes.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c; o.textContent = 'Lớp ' + c;
+    sel.appendChild(o);
+  });
+}
+
+async function loadTeacherList() {
+  const data = await callAPI('teachers');
+  if (!data || !data.data) return;
+  allTeachers = data.data;
+  const sel = document.getElementById('sel-teacher');
+  sel.innerHTML = '<option value="">-- Chọn giáo viên --</option>';
+  allTeachers.forEach(gv => {
+    const o = document.createElement('option');
+    o.value = gv['HỌ TÊN']; o.textContent = gv['HỌ TÊN'] + ' (' + gv['LỚP/NHÓM'] + ')';
+    sel.appendChild(o);
+  });
+}
+
+// ── RENDER TKB TABLE ────────────────────────────────────────
+function renderTKBTable(rows, title) {
+  if (!rows || !rows.length) return `<div class="loading-wrap">Chưa có dữ liệu TKB. Vui lòng nhập dữ liệu vào Google Sheet.</div>`;
+
+  // Group by lớp
+  const byClass = {};
+  rows.forEach(r => {
+    const lop = r['LỚP'] || r['LOP'];
+    if (!byClass[lop]) byClass[lop] = {};
+    const thu = r['THỨ'] || r['THU'];
+    const tiet = r['TIẾT'] || r['TIET'];
+    if (!byClass[lop][thu]) byClass[lop][thu] = {};
+    byClass[lop][thu][tiet] = r;
+  });
+
+  let html = '';
+  Object.keys(byClass).sort().forEach(lop => {
+    const khoi = parseInt(lop.split('.')[0]);
+    const maxTiet = khoi <= 2 ? 7 : 8;
+    html += `<div class="card" style="margin-bottom:16px">
+      <div class="card-header"><h2>🏫 Lớp ${lop}</h2></div>
+      <div class="card-body" style="padding:0">
+      <div class="tkb-wrap"><table class="tkb-table">
+      <thead><tr><th>Tiết</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}</tr></thead>
+      <tbody>`;
+    for (let t = 1; t <= maxTiet; t++) {
+      const buoiClass = t <= 4 ? 'tiet-sang' : 'tiet-chieu';
+      html += `<tr><td class="tiet-label ${buoiClass}">${t <= 4 ? '☀️' : '🌤️'} Tiết ${t}</td>`;
+      DAYS_SHORT.forEach((d, di) => {
+        const thu = di + 2;
+        const cell = byClass[lop][thu] && byClass[lop][thu][t];
+        if (!cell) {
+          html += `<td class="cell-empty ${buoiClass}">Tự học</td>`;
+        } else {
+          const mon = cell['MÔN'] || '';
+          const gv = cell['GIÁO VIÊN'] || cell['GV'] || '';
+          let cellClass = buoiClass;
+          if (mon === 'Chào cờ') cellClass += ' cell-chao-co';
+          else if (mon.includes('TA')) cellClass += ' cell-ta';
+          else if (['IC3','CDS','KNS','STEM','Toán TD'].includes(mon)) cellClass += ' cell-lk';
+          else if (mon === 'Tự học') cellClass += ' cell-tu-hoc';
+          html += `<td class="${cellClass}"><div class="cell-content">
+            <span class="cell-mon">${esc(mon)}</span>
+            ${gv ? `<span class="cell-gv">👤 ${esc(gv)}</span>` : ''}
+          </div></td>`;
+        }
+      });
+      html += '</tr>';
+    }
+    html += '</tbody></table></div></div></div>';
+  });
+  return html;
+}
+
+// ── LOAD FUNCTIONS ───────────────────────────────────────────
+async function loadOverview() {
+  document.getElementById('last-updated').textContent = new Date().toLocaleString('vi-VN');
+  const conflictData = await callAPI('conflicts');
+  if (conflictData) {
+    document.getElementById('stat-conflicts').textContent = conflictData.total || 0;
+    document.getElementById('stat-conflicts').style.color = conflictData.total > 0 ? 'var(--danger)' : 'var(--success)';
+  }
+  const wrap = document.getElementById('overview-table-wrap');
+  wrap.innerHTML = `<div style="color:var(--text2);text-align:center;padding:20px">
+    👈 Chọn menu bên trái để xem TKB theo khối / lớp / giáo viên / môn học
+  </div>`;
+}
+
+async function loadGrade() {
+  const khoi = document.getElementById('sel-grade').value;
+  if (!khoi) return;
+  const el = document.getElementById('grade-result');
+  el.innerHTML = '<div class="loading-wrap">⏳ Đang tải...</div>';
+  const data = await callAPI('tkb_grade', { khoi });
+  el.innerHTML = data && data.data ? renderTKBTable(data.data, 'Khối ' + khoi) : '<div class="loading-wrap">⚠️ Không tải được dữ liệu</div>';
+}
+
+async function loadClass() {
+  const lop = document.getElementById('sel-class').value;
+  if (!lop) return;
+  const el = document.getElementById('class-result');
+  el.innerHTML = '<div class="loading-wrap">⏳ Đang tải...</div>';
+  const data = await callAPI('tkb_class', { lop });
+  el.innerHTML = data && data.data ? renderTKBTable(data.data, 'Lớp ' + lop) : '<div class="loading-wrap">⚠️ Không tải được dữ liệu</div>';
+}
+
+async function loadTeacher() {
+  const gv = document.getElementById('sel-teacher').value;
+  if (!gv) return;
+  const el = document.getElementById('teacher-result');
+  el.innerHTML = '<div class="loading-wrap">⏳ Đang tải...</div>';
+  const data = await callAPI('tkb_teacher', { gv });
+  el.innerHTML = data && data.data ? renderTKBTable(data.data, gv) : '<div class="loading-wrap">⚠️ Không tải được dữ liệu</div>';
+}
+
+async function loadSubject() {
+  const mon = document.getElementById('sel-subject').value;
+  if (!mon) return;
+  const el = document.getElementById('subject-result');
+  el.innerHTML = '<div class="loading-wrap">⏳ Đang tải...</div>';
+  const data = await callAPI('tkb_subject', { mon });
+  el.innerHTML = data && data.data ? renderTKBTable(data.data, mon) : '<div class="loading-wrap">⚠️ Không tải được dữ liệu</div>';
+}
+
+async function loadConflicts() {
+  const el = document.getElementById('conflicts-result');
+  el.innerHTML = '<div class="loading-wrap">⏳ Đang kiểm tra xung đột...</div>';
+  const data = await callAPI('conflicts');
+  if (!data) { el.innerHTML = '<div class="loading-wrap">⚠️ Không kết nối được API</div>'; return; }
+  if (data.total === 0) {
+    el.innerHTML = `<div class="no-conflict">✅ Không có xung đột nào — TKB hợp lệ!</div>`;
+  } else {
+    el.innerHTML = data.conflicts.map(c => `
+      <div class="conflict-item">
+        <span class="conflict-icon">⚠️</span>
+        <div class="conflict-detail">
+          <div class="label">TRÙNG TIẾT GIÁO VIÊN</div>
+          <div class="desc">GV: <strong>${esc(c.gv)}</strong> — Thứ ${c.thu}, Tiết ${c.tiet}</div>
+          <div class="sub">Lớp ${esc(c.lop1)}: ${esc(c.mon1)} &nbsp;|&nbsp; Lớp ${esc(c.lop2)}: ${esc(c.mon2)}</div>
+        </div>
+      </div>`).join('');
+  }
+}
+
+// ── ADMIN AUTH ───────────────────────────────────────────────
+function checkAdminSession() {
+  const saved = sessionStorage.getItem('tkb_admin');
+  if (saved === 'true') setAdminMode(true);
+}
+
+async function doLogin() {
+  const pw = document.getElementById('pw-input').value;
+  const data = await callAPI('verify_admin', { pw });
+  if (data && data.ok) {
+    setAdminMode(true);
+    closeLoginModal();
+    showView('admin');
+    toast('✅ Đăng nhập thành công!', 'success');
+    sessionStorage.setItem('tkb_admin', 'true');
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+function setAdminMode(v) {
+  isAdmin = v;
+  document.getElementById('badge-admin').style.display = v ? '' : 'none';
+  document.getElementById('badge-user').style.display = v ? 'none' : '';
+  document.getElementById('login-status').textContent = v ? '🔑 Đang xem: Admin' : '👤 Đang xem: Khách';
+  document.getElementById('login-btn').textContent = v ? 'Đăng xuất' : 'Đăng nhập Admin';
+  document.getElementById('admin-locked').style.display = v ? 'none' : '';
+  document.getElementById('admin-panel').style.display = v ? '' : 'none';
+}
+
+function logout() {
+  setAdminMode(false);
+  sessionStorage.removeItem('tkb_admin');
+  showView('overview');
+  toast('👋 Đã đăng xuất', 'info');
+}
+
+function handleLoginToggle() {
+  if (isAdmin) logout(); else openLoginModal();
+}
+
+function openLoginModal() {
+  document.getElementById('modal-login').classList.add('show');
+  document.getElementById('pw-input').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  setTimeout(() => document.getElementById('pw-input').focus(), 100);
+}
+
+function closeLoginModal() {
+  document.getElementById('modal-login').classList.remove('show');
+}
+
+// ── REFRESH ──────────────────────────────────────────────────
+function refreshData() {
+  allTKB = null; allTeachers = null;
+  loadOverview();
+  toast('🔄 Đã đồng bộ dữ liệu mới nhất', 'success');
+}
+
+// ── TOAST ────────────────────────────────────────────────────
+function toast(msg, type = 'info') {
+  const c = document.getElementById('toast');
+  const el = document.createElement('div');
+  el.className = 'toast-item toast-' + type;
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ── HELPERS ──────────────────────────────────────────────────
+function esc(s) { return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
